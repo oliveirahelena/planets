@@ -1,2 +1,2 @@
-# typescript-boilerplate
-A starter project to Typescript
+# planets
+An app to explore planets by the kepler data

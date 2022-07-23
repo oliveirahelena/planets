@@ -1,1 +1,44 @@
-console.log('Starting');
+import { parse } from 'csv-parse';
+import fs from 'fs';
+
+type Planet = {
+  koi_disposition: string;
+  koi_insol: number;
+  koi_prad: number;
+  kepler_name: string;
+};
+
+const habitablePlanets: Planet[] = [];
+
+function isHabitablePlanet(planet: Planet): boolean {
+  return (
+    planet['koi_disposition'] === 'CONFIRMED' &&
+    planet['koi_insol'] > 0.36 &&
+    planet['koi_insol'] < 1.11 &&
+    planet['koi_prad'] < 1.6
+  );
+}
+
+fs.createReadStream('kepler_data.csv')
+  .pipe(
+    parse({
+      comment: '#',
+      columns: true,
+    }),
+  )
+  .on('data', (data) => {
+    if (isHabitablePlanet(data)) {
+      habitablePlanets.push(data);
+    }
+  })
+  .on('error', (err) => {
+    console.log(err);
+  })
+  .on('end', () => {
+    console.log(
+      habitablePlanets.map((planet) => {
+        return planet['kepler_name'];
+      }),
+    );
+    console.log(`${habitablePlanets.length} habitable planets found!`);
+  });
